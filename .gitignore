@@ -1,3 +1,9 @@
+# User-defined
+key.txt
+*.xlsx
+obj/
+main_backup.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
