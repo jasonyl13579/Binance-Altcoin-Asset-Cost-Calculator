@@ -19,4 +19,6 @@ query_list = ['BTS', 'BTC', 'ETH', 'ALGO', 'SRM', 'XRP', 'IOTA', \
 ```
 ### 5. python main.py
 
+### EXAMPLE OUTPUT
+![image](https://github.com/jasonyl13579/Binance-Altcoin-Asset-Cost-Calculator/blob/master/source/example.PNG)
 THAT'S ALL!!
