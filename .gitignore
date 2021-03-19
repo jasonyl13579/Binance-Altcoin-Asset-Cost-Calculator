@@ -1,8 +1,10 @@
 # User-defined
 key.txt
 *.xlsx
-obj/
+obj*
 main_backup.py
+test.py
+config.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

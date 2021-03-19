@@ -8,8 +8,9 @@ import base64
 import hashlib
 import hmac
 import datetime
-from urllib import parse
-import urllib.parse
+import time
+#from urllib import parse
+#import urllib.parse
 
 
 def create_signature(secret_key, builder):
@@ -29,3 +30,6 @@ def create_signature_with_query(secret_key, query):
 
 def utc_now():
     return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
+
+def get_current_timestamp():
+    return int(round(time.time() * 1000))
