@@ -4,14 +4,11 @@ Created on Tue Jan 19 23:37:28 2021
 
 @author: Corn
 """
-import requests
+from requests import request
 
-
-from source.assetinfo import AssetInfo, save_obj, load_obj
 from source.apisignature import create_signature_with_query
-from source.timeutil import get_current_timestamp, phrase_iso_to_time
+from source.timeutil import get_current_timestamp, phrase_iso_to_time, datetime_to_utc_time
 from clients.base_client import BaseClient
-from source.excelutil import generate_single_report_to_excel
 
 class FtxClient(BaseClient):
    
@@ -33,19 +30,23 @@ class FtxClient(BaseClient):
           'FTX-TS': time
         }
         url = self._domain_url + query
-        return requests.request("GET", url, headers=headers, data = payload)
+        return request("GET", url, headers=headers, data = payload)
+    def check_account_status(self):
+        return 0
     def get_transection_history(self, query_asset , trade_pair, starttime=None):  
-        #print (symbol, starttime)
         query =  "orders/history?market=%s" % (query_asset + '/' + trade_pair)
-        if starttime: query += "&start_time=%d" % starttime
+        if starttime: query += ("&start_time=%d" % int(starttime/1000))
         return self._send_get_request(query)
     def get_current_price(self, symbol):
         query =  "markets/%s" % (symbol + '/USDT')
         response = self._send_get_request(query)
-        
         if response.json()['success'] != True:
-            print ('Cant find %s price.' % symbol)
-            return -1
+            query =  "markets/%s" % (symbol + '/USD')
+            response = self._send_get_request(query)
+            if response.json()['success'] != True:
+                print ('Cant find %s price.' % symbol)
+                return -1
+            else: return float(response.json()['result']['price'])
         else: return float(response.json()['result']['price'])
     def get_previous_usdt_price (self, query_asset, end_time):
         ##　GET /markets/{market_name}/candles?resolution={resolution}&limit={limit}&start_time={start_time}&end_time={end_time}
@@ -56,8 +57,8 @@ class FtxClient(BaseClient):
     
     def get_deposite_history(self,starttime=None, endtime=None, asset=None ):
         query = 'wallet/deposits'
-        if starttime: query += "&start_time=%d" % starttime
-        if endtime: query += "&end_time=%d" % endtime
+        if starttime: query += "&start_time=%d" % starttime/1000
+        if endtime: query += "&end_time=%d" % endtime/1000
         return self._send_get_request(query)
     
     # def summary_asset_history(self, updateasset=True):
@@ -112,4 +113,5 @@ class FtxClient(BaseClient):
                 count += 1
             return (count, response.json()['hasMoreData'])
         else:
+            print (response.json())
             return (-1, False)

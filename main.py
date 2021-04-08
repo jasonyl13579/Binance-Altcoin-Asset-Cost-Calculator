@@ -6,13 +6,20 @@ Created on Tue Sep 15 14:19:18 2020
 """
 
 import sys 
-from clients.clients import init_client_from_key 
-
+from gui import GUI
+from clients.clients import Clients
 
 if __name__ == '__main__':
-    
-    clients = init_client_from_key("key.txt")
-    if len(sys.argv)>1 and sys.argv[1] == "-d":
-        clients.start(cal_deposite = True)
+
+    if len(sys.argv)>1:
+        clients = Clients()
+        clients.restore_client_config()
+        #clients.init_client_from_key("key.txt")
+        if sys.argv[1] == "-d":
+            clients.start_summary_deposite_history()
+        elif sys.argv[1] == "-g":
+            clients.start_generate_summary_report_to_excel()
     else:
-        clients.start()
+        window = GUI()
+        window.setMainUI()
+        window.run()

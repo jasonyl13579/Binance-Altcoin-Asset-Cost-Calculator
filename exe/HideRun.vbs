@@ -1,0 +1,1 @@
+CreateObject("WScript.Shell").Run "cmd /c D:\Jason\Altcoin\Asset_Statistic_User\crawler.bat",0

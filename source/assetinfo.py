@@ -5,20 +5,24 @@ Created on Tue Sep 15 15:53:19 2020
 @author: Corn
 """
 from datetime import datetime
-import pickle
-import os
+from pickle import load, dump, HIGHEST_PROTOCOL
+from os import path, remove, mkdir
 
 def save_obj(obj, name ):
         with open('obj/'+ name + '.pkl', 'wb') as f:
-            pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
-def load_obj(name ):
+            dump(obj, f, HIGHEST_PROTOCOL)
+def load_obj(name):
     try:
-        if not os.path.exists('obj/'): os.mkdir('obj/')
+        if not path.exists('obj/'): mkdir('obj/')
         with open('obj/' + name + '.pkl', 'rb') as f:
-            return pickle.load(f)
+            return load(f)
     except:
         return None
-    
+def delete_obj(name):
+    try:
+        remove('obj/' + name + '.pkl')
+    except:
+        print ("Delete fail.")
 class AssetInfo():
     def __init__(self, name = None, trade_pair_list = None, qty = 0.0, last_query_timestamp = None):
         self.name = name
@@ -30,7 +34,7 @@ class AssetInfo():
         self.deposit_count = 0
         self.last_query_timestamp = last_query_timestamp
         self.each_last_query_timestamp = {}
-        self.trade_pair_list = trade_pair_list
+        self.trade_pair_list = trade_pair_list.copy()
         for t in self.trade_pair_list:
             self.each_last_query_timestamp[t] = last_query_timestamp
     
@@ -45,9 +49,11 @@ class AssetInfo():
         for t in self.trade_pair_list:
             self.each_last_query_timestamp[t] = last_query_timestamp
     def upgrade_time(self, tradepair, time):
+        ## add 1 second to avoid duplication
         if not self.each_last_query_timestamp[tradepair] or self.each_last_query_timestamp[tradepair] < float(time): 
-            self.each_last_query_timestamp[tradepair] = float(time+1)
-        if not self.last_query_timestamp or self.last_query_timestamp < float(time): self.last_query_timestamp = float(time+1)
+            self.each_last_query_timestamp[tradepair] = float(time+1001)
+        if not self.last_query_timestamp or self.last_query_timestamp < float(time): 
+            self.last_query_timestamp = float(time+1001)
     def _upgrade(self, qty, quoteQty, isBuyer=True):
         if isBuyer:
             self.qty += qty
