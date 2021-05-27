@@ -26,7 +26,8 @@ class BinanceClient(BaseClient):
         if with_key: headers['X-MBX-APIKEY'] = self.info.api_key
         return request("GET", url, headers=headers, data = payload)
     def check_account_status(self):
-        response = self.get_transection_history('BTC', 'USDT', tu.get_current_timestamp())
+        response = self.get_transection_history('BTC', 'USDT', tu.get_current_timestamp()-10000000)
+        #print(tu.datetime_to_utc_time(tu.get_current_timestamp()-10000000))
         if response.status_code != 200:
             if response.status_code == 401:
                 print (response.json()['msg'])
@@ -117,7 +118,7 @@ class BinanceClient(BaseClient):
                 if query_asset not in assets: assets[query_asset] = AssetInfo(query_asset, self.trade_pair_list)
                 asset_obj = assets[query_asset]
                 if deposit['asset'] != "USDT":
-                    question = "帳戶:%s\n輸入本%s紀錄的USDT成本. \n(數量:%d, 時間:%s):" % \
+                    question = "帳戶:%s\n輸入本%s紀錄的USDT成本. \n(數量:%f, 時間:%s):" % \
                         (accountname, deposit['asset'], deposit['amount'],tu.datetime_to_utc_time(deposit['insertTime']))
                     if gui:
                         if app == None: return 

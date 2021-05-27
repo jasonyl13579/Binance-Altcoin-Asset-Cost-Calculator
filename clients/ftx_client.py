@@ -29,6 +29,7 @@ class FtxClient(BaseClient):
           'FTX-SIGN': create_signature_with_query(self.info.api_secret, signature_payload),
           'FTX-TS': time
         }
+        if self.info.api_subaccount_nickname: headers['FTX-SUBACCOUNT'] = self.info.api_subaccount_nickname
         url = self._domain_url + query
         return request("GET", url, headers=headers, data = payload)
     def check_account_status(self):

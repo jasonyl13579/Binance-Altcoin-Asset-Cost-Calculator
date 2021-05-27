@@ -5,6 +5,7 @@ Created on Wed Jan 20 23:38:06 2021
 @author: Corn
 """
 import sys
+import traceback
 from os import path, getcwd
 from json import load, dump
 
@@ -64,7 +65,7 @@ class Clients:
         if client_data['exchange'] == 'binance':
             new_client = BinanceClient(client_name, client_info)
             self.add_client(client_name, new_client)
-        elif client_data['exchange'] == 'ftx':
+        elif client_data['exchange'] in ['ftx', 'ftx_subaccount']:
             new_client = FtxClient(client_name, client_info)
             self.add_client(client_name, new_client)
     def restore_client_config(self, save_filename = '.config'):
@@ -82,15 +83,18 @@ class Clients:
             self.owner = "name"
             return
         try:
-            with open(save_filename, 'r') as f:
+            with open(save_filename, 'r', encoding='utf8') as f:
                 config = load(f) 
             if 'meta_save_path' in config: self.meta_save_path = config['meta_save_path']
             self.owner = config['owner']
             self.count = config['count']
+            
             for client_name, client_data in config['account'].items():
+                #print (client_data)
                 self.process_client_data(client_name, client_data)
         except:
             self.owner = "name"
+            traceback.print_exc()
             print("Init config fail.")
         print ("In restore:" + self.meta_save_path)
     def save_client_config(self, save_filename = '.config'):

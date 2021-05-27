@@ -46,7 +46,7 @@ class BaseClient:
     
     def process_deposite_history(self, history, gui = False, app=None):
         return NotImplementedError
-    def persetAsset(assets):
+    def persetAsset(self, assets):
         assets['ETH'].resetAsset(0.14247952, 1600266309450)
         assets['BTC'].resetAsset(0, 1600266309450)
         assets['BNB'].resetAsset(2.95568409, 1600266309450)
@@ -59,7 +59,7 @@ class BaseClient:
         total_count = 0
         for t in self.trade_pair_list:
              if t not in assets: assets[t] = AssetInfo(t, self.trade_pair_list)
-        #if self.accountname == 'binance_Jason': cu.persetAsset(assets)
+        if self.accountname == 'binance_Jason': self.persetAsset(assets)
         for query_asset in self.info.query_list:
             if query_asset not in assets: assets[query_asset] = AssetInfo(query_asset, self.trade_pair_list)
             if updateasset and query_asset not in visited_query:
@@ -79,8 +79,8 @@ class BaseClient:
                             print ("Add %d %s data." % (count, symbol))
                             total_count += count
                         else:
-                            print ("Cant not query symbol: " + symbol)
-                            asset_obj.remove_trade_pair(trade_pair)
+                            print ("No symbol: " + symbol)
+                            #asset_obj.remove_trade_pair(trade_pair)
                 profit += (asset_obj.current_price * asset_obj.qty - asset_obj.quoteQty)   
                 #asset_obj.print_info()   
         #persetAsset(assets)

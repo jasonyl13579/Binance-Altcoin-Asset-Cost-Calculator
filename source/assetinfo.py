@@ -5,6 +5,7 @@ Created on Tue Sep 15 15:53:19 2020
 @author: Corn
 """
 from datetime import datetime
+from source.timeutil import get_current_timestamp, phrase_iso_to_time, datetime_to_utc_time
 from pickle import load, dump, HIGHEST_PROTOCOL
 from os import path, remove, mkdir
 
@@ -36,7 +37,7 @@ class AssetInfo():
         self.each_last_query_timestamp = {}
         self.trade_pair_list = trade_pair_list.copy()
         for t in self.trade_pair_list:
-            self.each_last_query_timestamp[t] = last_query_timestamp
+            self.each_last_query_timestamp[t] = None
     
     
     def resetAsset(self,qty , last_query_timestamp):
@@ -112,7 +113,10 @@ class AssetInfo():
         
         print ("Transection count: %d" % self.transection_count)
         if self.last_query_timestamp:
-            print ("Last transection time: %s" % datetime.utcfromtimestamp(float(self.last_query_timestamp/1000))) 
+            print ("Last transection time: %s" % datetime_to_utc_time(self.last_query_timestamp)) 
         else:
             print ("Last transection time: No history.")
+        print (self.trade_pair_list)
+        for t in self.trade_pair_list:
+            print ("%s:%s" % (t, datetime_to_utc_time(self.each_last_query_timestamp[t])))
         print ("-----------------------------------------")

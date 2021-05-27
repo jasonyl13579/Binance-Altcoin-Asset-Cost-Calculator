@@ -10,6 +10,7 @@ class ClientInfo():
     def __init__(self, api_key=None, api_secret=None, accountname=None, save_path='./', query_list=None, index=0, timestamp=tu.DEFAULT_EPOCH_TIME):
         self.api_key = api_key
         self.api_secret = api_secret
+        self.api_subaccount_nickname = None
         self.save_path = save_path
         self.query_list = query_list
         self.exchange = 'default'
@@ -39,7 +40,7 @@ class ClientInfo():
             if 'deposit_USDT' in data: self.deposit_USDT = data['deposit_USDT']
             if 'last_asset_upgrade_time' in data: self.last_asset_upgrade_time = data['last_asset_upgrade_time']
             if 'last_deposit_timestamp' in data: self.last_deposit_timestamp = data['last_deposit_timestamp']
-            
+            if 'api_subaccount_nickname' in data: self.api_subaccount_nickname = data['api_subaccount_nickname']
         except Exception as e:
             print(str(e) + "not exist.")
             print("Set info fail.")

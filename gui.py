@@ -7,6 +7,7 @@ Created on Wed Mar 17 23:57:48 2021
 import sys
 from os import path
 #import tkinter as tk
+from tkinter.ttk import Combobox
 from tkinter import Tk, Toplevel, StringVar, Button, Label, Entry, Listbox, Menu, Text
 from tkinter import END, PhotoImage, messagebox
 from tkinter.scrolledtext import ScrolledText
@@ -87,12 +88,14 @@ class GUI():
             dir_path = filedialog.askdirectory(initialdir = self.clients.meta_save_path, title="請選擇要報告輸出的資料夾")
             new_directory.set(dir_path if dir_path != '' else old_path)
         def editClient(new = True, old_name = None):
+            exchange_list = ["binance","ftx","ftx_subaccount"]
             def onProcessClientData():
                 name = new_name.get()
-                exchange = new_exchange.get()
+                exchange = exchange_list[combobox_new_exchange.current()]
                 api_key = new_api_key.get()
                 api_secret = new_api_secret.get()
-                query_str = new_query_list.get()            
+                query_str = new_query_list.get()   
+                subaccount_name = new_subaccount_name.get()
                 ## Check name
                 try:
                     for s in name:
@@ -107,10 +110,10 @@ class GUI():
                         msg.set('Error: ' + '名稱勿超過15字')
                     elif name in self.clients.client_dict and new:
                         msg.set('Error: ' + '名字勿重複')
-                    elif not len(api_key) or not len(api_secret) or not len(name) or not len(exchange):
+                    elif not len(api_key) or not len(api_secret) or not len(name):
                         msg.set('Error: ' + "請輸入名稱、金錀或交易所")
-                    elif exchange not in ['binance', 'ftx']:
-                        msg.set('Error: ' + "目前交易所僅支援 binance 和 ftx")
+                   # elif exchange not in ['binance', 'ftx']:
+                   #     msg.set('Error: ' + "目前交易所僅支援 binance 和 ftx")
                     else:
                     ## Add client to config
                         specialChars = " \n!\"#$%^&*()" 
@@ -120,7 +123,8 @@ class GUI():
                                         'api_key': api_key,
                                         'api_secret':api_secret,
                                         'query_list': query_str.upper().split(','),
-                                        'exchange': exchange
+                                        'exchange': exchange,
+                                        'api_subaccount_nickname': subaccount_name
                                       }
                         if new:
                             client_data['index'] = self.clients.count
@@ -137,6 +141,13 @@ class GUI():
                 except Exception as e:
                         msg.set('Error')
                         print (e)
+            def onComboBoxChanged(event):
+                if exchange_list[combobox_new_exchange.current()] != 'ftx_subaccount':
+                    new_subaccount_name.set('')
+                    entry_subaccount_name['state'] = 'disabled'
+                else:
+                    entry_subaccount_name['state'] = 'normal'
+                return 
             window_add_client = Toplevel(self.app)
             window_add_client.title("編輯您的帳戶資訊")
             window_add_client.geometry('400x300')  
@@ -151,11 +162,16 @@ class GUI():
             entry_new_name = Entry(window_add_client, textvariable=new_name, width=35)  # 建立一個註冊名的`entry`，變數為`new_name`
             entry_new_name.place(x=130, y=10)  # `entry`放置在座標（150,10）.
             
-            new_exchange = StringVar()
-            new_exchange.set('binance') 
+            #new_exchange = StringVar()
+            #new_exchange.set('binance') 
             Label(window_add_client, text='Exchange: ').place(x=10, y=50)
-            entry_new_exchange= Entry(window_add_client, textvariable=new_exchange, width=35)
-            entry_new_exchange.place(x=130, y=50)
+            #entry_new_exchange= Entry(window_add_client, textvariable=new_exchange, width=35)
+            #entry_new_exchange.place(x=130, y=50)
+            combobox_new_exchange = Combobox(window_add_client, 
+                            values=exchange_list)
+            combobox_new_exchange.current(0)
+            combobox_new_exchange.place(x=130, y=50)
+            combobox_new_exchange.bind("<<ComboboxSelected>>", onComboBoxChanged)
             
             new_api_key = StringVar()
             Label(window_add_client, text='API key: ').place(x=10, y=90)
@@ -173,19 +189,29 @@ class GUI():
             Entry(window_add_client, textvariable=new_query_list, width=35) \
             .place(x=130, y=170)
             
+            new_subaccount_name = StringVar()
+            Label(window_add_client, text='FTX subaccount: ').place(x=10, y=210)
+            entry_subaccount_name = Entry(window_add_client, textvariable=new_subaccount_name, width=35) 
+            entry_subaccount_name.place(x=130, y=210)
+            entry_subaccount_name['state'] = 'disable'
+            
             msg = StringVar()
-            Label(window_add_client, textvariable=msg, fg='red').place(x=20, y=210)
+            Label(window_add_client, textvariable=msg, fg='red').place(x=20, y=240)
             btn_comfirm_sign_up = Button(window_add_client, text='確認', command=onProcessClientData)
-            btn_comfirm_sign_up.place(x=180, y=250)
+            btn_comfirm_sign_up.place(x=180, y=270)
             
             if not new:
                 entry_new_name['state'] = 'disabled'
                 info = self.clients.client_dict[old_name].info
                 new_name.set(old_name)  
-                new_exchange.set(info.exchange)
+                combobox_new_exchange.set(info.exchange)
                 new_api_key.set(info.api_key)
                 new_api_secret.set(info.api_secret)
                 new_query_list.set(','.join(info.query_list))
+                #print (info)
+                if (info.api_subaccount_nickname): 
+                    new_subaccount_name.set(info.api_subaccount_nickname)
+                    entry_subaccount_name['state'] = 'normal'
         def onImportClient():
             file_path = filedialog.askopenfile(initialdir = self.clients.meta_save_path, title="請選擇要匯入的key.txt").name
             self.clients.init_client_from_key(file_path, CONFIG_FILENAME)
