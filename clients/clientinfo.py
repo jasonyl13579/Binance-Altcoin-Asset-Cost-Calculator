@@ -14,6 +14,7 @@ class ClientInfo():
         self.save_path = save_path
         self.query_list = query_list
         self.exchange = 'default'
+        self.pre_profit = 0
         self.profit = 0
         self.asset_num = 0
         self.index = index
@@ -35,6 +36,7 @@ class ClientInfo():
             if 'query_list' in data: self.query_list = data['query_list']
             if 'exchange' in data: self.exchange = data['exchange']
             if 'profit' in data: self.profit = data['profit']
+            if 'pre_profit' in data: self.pre_profit = data['pre_profit']
             if 'asset_num' in data: self.asset_num = data['asset_num']
             if 'index' in data: self.index = data['index']
             if 'deposit_USDT' in data: self.deposit_USDT = data['deposit_USDT']

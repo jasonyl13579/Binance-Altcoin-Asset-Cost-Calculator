@@ -9,21 +9,7 @@ from source.timeutil import get_current_timestamp, phrase_iso_to_time, datetime_
 from pickle import load, dump, HIGHEST_PROTOCOL
 from os import path, remove, mkdir
 
-def save_obj(obj, name ):
-        with open('obj/'+ name + '.pkl', 'wb') as f:
-            dump(obj, f, HIGHEST_PROTOCOL)
-def load_obj(name):
-    try:
-        if not path.exists('obj/'): mkdir('obj/')
-        with open('obj/' + name + '.pkl', 'rb') as f:
-            return load(f)
-    except:
-        return None
-def delete_obj(name):
-    try:
-        remove('obj/' + name + '.pkl')
-    except:
-        print ("Delete fail.")
+
 class AssetInfo():
     def __init__(self, name = None, trade_pair_list = None, qty = 0.0, last_query_timestamp = None):
         self.name = name
@@ -119,4 +105,23 @@ class AssetInfo():
         print (self.trade_pair_list)
         for t in self.trade_pair_list:
             print ("%s:%s" % (t, datetime_to_utc_time(self.each_last_query_timestamp[t])))
-        print ("-----------------------------------------")
+        print ("-----------------------------------------")\
+
+
+def save_obj(obj, name ):
+        with open('obj/'+ name + '.pkl', 'wb') as f:
+            dump(obj, f, HIGHEST_PROTOCOL)
+def load_obj(name) -> dict:
+    try:
+        if not path.exists('obj/'): mkdir('obj/')
+        with open('obj/' + name + '.pkl', 'rb') as f:
+            obj =  load(f)
+            return obj
+        
+    except:
+        return None
+def delete_obj(name):
+    try:
+        remove('obj/' + name + '.pkl')
+    except:
+        print ("Delete fail.")

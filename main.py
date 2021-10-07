@@ -19,6 +19,9 @@ if __name__ == '__main__':
             clients.start_summary_deposite_history()
         elif sys.argv[1] == "-g":
             clients.start_generate_summary_report_to_excel()
+            clients.start_send_summary_to_telegram()
+        elif sys.argv[1] == '-s':
+            clients.start_send_summary_to_telegram()
     else:
         window = GUI()
         window.setMainUI()

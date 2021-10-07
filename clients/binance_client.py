@@ -68,7 +68,7 @@ class BinanceClient(BaseClient):
         query =  "startTime=%d&endTime=%d&timestamp=%d" % (starttime, endtime, tu.get_current_timestamp())
         if asset: query += "&asset=%s" % (asset)
         signature = create_signature_with_query(self.info.api_secret, query)   
-        url = self._domain_url + "wapi/v3/depositHistory.html?%s&signature=%s"  % (query, signature)
+        url = self._domain_url + "sapi/v1/capital/deposit/hisrec?%s&signature=%s"  % (query, signature)
         
         return self._send_get_request(url, with_key=True)
     def process_transection_history(self, response, trade_pair, asset_obj):
@@ -98,6 +98,7 @@ class BinanceClient(BaseClient):
         while epoch < tu.get_current_timestamp():
             res = self.get_deposite_history(epoch, epoch + EPOCH_INTERVAL)
             print ("Processing " + (tu.datetime_to_utc_time(epoch)) + " to " + tu.datetime_to_utc_time(epoch + EPOCH_INTERVAL))
+            print (res.json())
             if res.json()["depositList"]:
                 if gui:
                     data.append((self.accountname, res.json()["depositList"]))

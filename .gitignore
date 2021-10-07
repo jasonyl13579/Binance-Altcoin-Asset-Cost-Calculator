@@ -6,6 +6,7 @@ main_backup.py
 test.py
 config.json
 *config*
+Jason*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -12,6 +12,8 @@ from json import load, dump
 from clients.binance_client import BinanceClient
 from clients.ftx_client import FtxClient
 from clients.clientinfo import ClientInfo
+from clients.telegram_client import telegramClient
+from source.timeutil import get_current_timestamp, datetime_to_utc_time
 from source.excelutil import generate_summary_report_to_excel
 
 class Clients:
@@ -20,6 +22,7 @@ class Clients:
         self.meta_save_path = meta_save_path
         self.count = 0
         self.client_dict = {}
+        self.telegram_bot = None
     def add_client(self, name, new_client):
         if name in self.client_dict:
             print ('Client name already exist.')
@@ -41,7 +44,8 @@ class Clients:
         data, err = None, 0
         for name, client in self.client_dict.items(): 
             err = client.summary_asset_history(updateasset=True)
-        if not err: generate_summary_report_to_excel(self.client_dict, self.meta_save_path)
+        if not err: 
+            generate_summary_report_to_excel(self.client_dict, self.meta_save_path)
         self.save_client_config(save_filename = save_filename)
         return data
     def start_summary_deposite_history(self, gui = False, save_filename = '.config'):
@@ -49,10 +53,28 @@ class Clients:
         for name, client in self.client_dict.items():
             (data, err) = client.summary_deposite_history(gui)
             res[name] = data
-        if err == NotImplementedError: print(client.info.exchange + " does not support this feature.")
-        elif err: print("Error in summary deposite history.")
+        if err == NotImplementedError: 
+            print(client.info.exchange + " does not support this feature.")
+        elif err: 
+            print("Error in summary deposite history.")
         self.save_client_config(save_filename = save_filename)
         return res
+    def start_send_summary_to_telegram(self, save_filename = '.config'):
+        if self.telegram_bot:
+            with open(save_filename, 'r', encoding='utf8') as f:
+                config = load(f) 
+                msg = '🌽 Timestamp: %s\n\n' % ( datetime_to_utc_time(get_current_timestamp()) )
+                for client_name, client_data in config['account'].items():
+                    profit_rate = (client_data["profit"] - client_data["pre_profit"])
+                    profit_msg = '🔺' if profit_rate >= 0 else '🔻'
+                    profit_msg += (' Profit today: %d USDT\n      ' % (profit_rate))
+
+                    msg += '✅ Account name: %s\n%sTotal earn: %d USDT\n      Asset number: %d      \n      Last Trade: %s\n\n' \
+                        % (client_name, profit_msg, client_data["profit"], client_data["asset_num"], \
+                        datetime_to_utc_time(client_data["last_asset_upgrade_time"])
+                         )
+                #print (msg)
+                self.telegram_bot.send_msg_to_telegram_channel(msg)
     def process_summary_deposite_history(self, history, gui, app):
         for name, client in self.client_dict.items():
             client.process_deposite_history(history[client.accountname], gui = True, app=app)
@@ -90,8 +112,10 @@ class Clients:
             self.count = config['count']
             
             for client_name, client_data in config['account'].items():
-                #print (client_data)
-                self.process_client_data(client_name, client_data)
+                self.process_client_data(client_name, client_data)     
+            if 'telegram_info' in config:
+                self.telegram_bot = telegramClient()
+                self.telegram_bot.set_info({ "name" : self.owner, **config['telegram_info']})
         except:
             self.owner = "name"
             traceback.print_exc()
@@ -102,10 +126,13 @@ class Clients:
         config['owner'] = self.owner
         config['meta_save_path'] = self.meta_save_path
         config['count'] = self.count
+        if self.telegram_bot:
+            config['telegram_info'] = self.telegram_bot.get_info() 
         config['account'] = {}
         for client_name, client in self.client_dict.items():
             client.info.save_path = self.meta_save_path
             config['account'][client_name] = client.info.__dict__
+
         with open(save_filename, 'w') as f:
             dump(config, f, indent=4)
     def init_client_from_key(self, key_path = None, save_filename = '.config'):

@@ -81,12 +81,21 @@ class BaseClient:
                         else:
                             print ("No symbol: " + symbol)
                             #asset_obj.remove_trade_pair(trade_pair)
+                
+                for t in asset_obj.trade_pair_list:
+                    if asset_obj.each_last_query_timestamp[t]:
+                        if (not asset_obj.last_query_timestamp or asset_obj.each_last_query_timestamp[t] < float(asset_obj.last_query_timestamp)): 
+                            asset_obj.last_query_timestamp = asset_obj.each_last_query_timestamp[t]
+                print (asset_obj.last_query_timestamp)
+               
+                if asset_obj.last_query_timestamp and (not self.info.last_asset_upgrade_time or self.info.last_asset_upgrade_time < float(asset_obj.last_query_timestamp)): 
+                    self.info.last_asset_upgrade_time = float(asset_obj.last_query_timestamp)
                 profit += (asset_obj.current_price * asset_obj.qty - asset_obj.quoteQty)   
                 #asset_obj.print_info()   
         #persetAsset(assets)
+        self.info.pre_profit = self.info.profit
         self.info.profit = profit
         #self.info.asset_num = len(assets) 
-        self.info.last_asset_upgrade_time = tu.get_current_timestamp()
         self.save_assets()
         generate_single_report_to_excel(self)
         return 0
